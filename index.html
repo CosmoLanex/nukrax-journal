@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nukrax Trading Journal V2</title>
+  <style>
+    body { background:#0b0b0b; color:#fff; font-family:Arial; padding:20px;}
+    .card { background:#1a1a1a; padding:20px; border-radius:10px; margin-bottom:20px;}
+    input, select, textarea { width:100%; margin:5px 0; padding:8px; background:#222; color:#fff; border:none;}
+    button { padding:10px; background:#444; color:#fff; border:none; cursor:pointer; margin-top:10px;}
+    .warn { color:red; }
+    .stats { display:flex; gap:20px; }
+    .stat { background:#222; padding:10px; border-radius:8px; }
+  </style>
+</head>
+<body>
+
+<h1>Nukrax Trading Journal V2</h1>
+
+<div class="card stats">
+  <div class="stat">Total: <span id="total">0</span></div>
+  <div class="stat">Wins: <span id="wins">0</span></div>
+  <div class="stat">Losses: <span id="losses">0</span></div>
+  <div class="stat">Win Rate: <span id="wr">0%</span></div>
+</div>
+
+<div class="card">
+<h3>Trade Entry</h3>
+
+<select id="type"><option>Buy</option><option>Sell</option></select>
+<select id="tf"><option>5m</option><option>15m</option><option>30m</option><option>1H</option></select>
+<select id="session"><option>London</option><option>New York</option><option>Asia</option></select>
+
+<input id="rr" placeholder="RR (e.g. 2)">
+<select id="result"><option>Win</option><option>Loss</option></select>
+
+<h4>Checklist</h4>
+<label><input type="checkbox" class="chk"> HTF Bias</label><br>
+<label><input type="checkbox" class="chk"> Liquidity Sweep</label><br>
+<label><input type="checkbox" class="chk"> BOS</label><br>
+<label><input type="checkbox" class="chk"> FVG</label><br>
+<label><input type="checkbox" class="chk"> Session Valid</label><br>
+<label><input type="checkbox" class="chk"> Entry Confirm</label><br>
+
+<p id="warn" class="warn"></p>
+
+<h4>Reflection</h4>
+<textarea id="note"></textarea>
+
+<button onclick="saveTrade()">Save Trade</button>
+<button onclick="resetForm()">Add Another Trade</button>
+
+</div>
+
+<div class="card">
+<h3>Filter</h3>
+<select id="filter" onchange="render()">
+<option value="all">All</option>
+<option value="Win">Wins</option>
+<option value="Loss">Losses</option>
+</select>
+</div>
+
+<div class="card">
+<h3>Trades</h3>
+<div id="list"></div>
+</div>
+
+<script>
+function getTrades(){
+  return JSON.parse(localStorage.getItem("trades")||"[]")
+}
+
+function saveTrade(){
+  let checks = document.querySelectorAll(".chk");
+  let allChecked = [...checks].every(c=>c.checked);
+
+  if(!allChecked){
+    document.getElementById("warn").innerText="Rules not satisfied — do NOT take this trade";
+    return;
+  }
+
+  let trade = {
+    type: type.value,
+    tf: tf.value,
+    session: session.value,
+    rr: rr.value,
+    result: result.value,
+    note: note.value,
+    date: new Date().toLocaleString()
+  };
+
+  let trades = getTrades();
+  trades.unshift(trade);
+  localStorage.setItem("trades", JSON.stringify(trades));
+
+  render();
+  resetForm();
+}
+
+function resetForm(){
+  document.querySelectorAll("input, textarea").forEach(i=>{ if(i.type!="checkbox") i.value=""; });
+  document.querySelectorAll(".chk").forEach(c=>c.checked=false);
+  document.getElementById("warn").innerText="";
+}
+
+function updateStats(trades){
+  let total = trades.length;
+  let wins = trades.filter(t=>t.result=="Win").length;
+  let losses = trades.filter(t=>t.result=="Loss").length;
+  let wr = total ? ((wins/total)*100).toFixed(1) : 0;
+
+  document.getElementById("total").innerText=total;
+  document.getElementById("wins").innerText=wins;
+  document.getElementById("losses").innerText=losses;
+  document.getElementById("wr").innerText=wr+"%";
+}
+
+function render(){
+  let trades = getTrades();
+  let filter = document.getElementById("filter").value;
+
+  if(filter!="all"){
+    trades = trades.filter(t=>t.result==filter);
+  }
+
+  updateStats(getTrades());
+
+  let html="";
+  trades.forEach(t=>{
+    html += `<div style="border-bottom:1px solid #333;padding:10px">
+      ${t.type} | ${t.tf} | ${t.session} | RR:${t.rr} | ${t.result}<br>
+      ${t.date}<br>
+      <small>${t.note}</small>
+    </div>`;
+  });
+
+  document.getElementById("list").innerHTML=html;
+}
+
+render();
+</script>
+
+</body>
+</html>
