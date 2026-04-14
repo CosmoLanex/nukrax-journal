@@ -160,7 +160,7 @@ function saveTrade(){
   let checks = document.querySelectorAll(".chk");
 
   if(![...checks].every(c=>c.checked)){
-    warn.innerText = "❌ Rules not satisfied";
+    warn.innerText = "❌ Rules not satisfied Don't take this trade";
     return;
   }
 
