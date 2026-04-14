@@ -1,37 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Nukrax Trading Journal V2</title>
+  <title>Nukrax Journal V3</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { background:#0b0b0b; color:#fff; font-family:Arial; padding:20px;}
-    .card { background:#1a1a1a; padding:20px; border-radius:10px; margin-bottom:20px;}
+    .card { background:#1a1a1a; padding:15px; border-radius:10px; margin-bottom:20px;}
     input, select, textarea { width:100%; margin:5px 0; padding:8px; background:#222; color:#fff; border:none;}
-    button { padding:10px; background:#444; color:#fff; border:none; cursor:pointer; margin-top:10px;}
-    .warn { color:red; }
-    .stats { display:flex; gap:20px; }
-    .stat { background:#222; padding:10px; border-radius:8px; }
+    button { padding:8px; margin-top:5px; background:#444; color:#fff; border:none; cursor:pointer;}
+    .win { border-left:5px solid green;}
+    .loss { border-left:5px solid red;}
+    .stats { display:flex; flex-wrap:wrap; gap:10px;}
+    .stat { background:#222; padding:10px; border-radius:8px; min-width:120px;}
+    img { max-width:100%; margin-top:10px; border-radius:8px;}
   </style>
 </head>
+
 <body>
 
-<h1>Nukrax Trading Journal V2</h1>
+<h1>Nukrax Journal V3</h1>
 
 <div class="card stats">
-  <div class="stat">Total: <span id="total">0</span></div>
-  <div class="stat">Wins: <span id="wins">0</span></div>
-  <div class="stat">Losses: <span id="losses">0</span></div>
-  <div class="stat">Win Rate: <span id="wr">0%</span></div>
+  <div class="stat">Total: <span id="total"></span></div>
+  <div class="stat">Win Rate: <span id="wr"></span></div>
+  <div class="stat">Profit: <span id="profit"></span></div>
+  <div class="stat">A+ WR: <span id="aplus"></span></div>
 </div>
 
 <div class="card">
-<h3>Trade Entry</h3>
+<h3>Add Trade</h3>
 
 <select id="type"><option>Buy</option><option>Sell</option></select>
 <select id="tf"><option>5m</option><option>15m</option><option>30m</option><option>1H</option></select>
-<select id="session"><option>London</option><option>New York</option><option>Asia</option></select>
+<select id="session" onchange="sessionWarn()">
+<option>London</option>
+<option>New York</option>
+<option>Asia</option>
+</select>
 
-<input id="rr" placeholder="RR (e.g. 2)">
+<input id="rr" placeholder="RR (e.g 2)">
 <select id="result"><option>Win</option><option>Loss</option></select>
+
+<label><input type="checkbox" id="aplusBox"> A+ Setup</label>
 
 <h4>Checklist</h4>
 <label><input type="checkbox" class="chk"> HTF Bias</label><br>
@@ -41,23 +51,19 @@
 <label><input type="checkbox" class="chk"> Session Valid</label><br>
 <label><input type="checkbox" class="chk"> Entry Confirm</label><br>
 
-<p id="warn" class="warn"></p>
+<p id="warn" style="color:red;"></p>
 
-<h4>Reflection</h4>
-<textarea id="note"></textarea>
+<textarea id="note" placeholder="Reflection..."></textarea>
+<input type="file" id="imgInput">
 
 <button onclick="saveTrade()">Save Trade</button>
-<button onclick="resetForm()">Add Another Trade</button>
 
 </div>
 
 <div class="card">
-<h3>Filter</h3>
-<select id="filter" onchange="render()">
-<option value="all">All</option>
-<option value="Win">Wins</option>
-<option value="Loss">Losses</option>
-</select>
+<h3>Charts</h3>
+<canvas id="equity"></canvas>
+<canvas id="pie"></canvas>
 </div>
 
 <div class="card">
@@ -70,71 +76,113 @@ function getTrades(){
   return JSON.parse(localStorage.getItem("trades")||"[]")
 }
 
+function sessionWarn(){
+  if(session.value==="Asia"){
+    warn.innerText="⚠ Avoid Asia session (low probability)";
+  } else warn.innerText="";
+}
+
 function saveTrade(){
   let checks = document.querySelectorAll(".chk");
-  let allChecked = [...checks].every(c=>c.checked);
-
-  if(!allChecked){
-    document.getElementById("warn").innerText="Rules not satisfied — do NOT take this trade";
+  if(![...checks].every(c=>c.checked)){
+    warn.innerText="Rules not satisfied";
     return;
   }
 
-  let trade = {
-    type: type.value,
-    tf: tf.value,
-    session: session.value,
-    rr: rr.value,
-    result: result.value,
-    note: note.value,
-    date: new Date().toLocaleString()
+  let reader = new FileReader();
+  let file = imgInput.files[0];
+
+  reader.onload = function(){
+    let trade = {
+      type:type.value,
+      tf:tf.value,
+      session:session.value,
+      rr:parseFloat(rr.value||1),
+      result:result.value,
+      note:note.value,
+      aplus:aplusBox.checked,
+      img: reader.result,
+      date:new Date().toLocaleString()
+    };
+
+    let trades=getTrades();
+    trades.unshift(trade);
+    localStorage.setItem("trades",JSON.stringify(trades));
+
+    render();
   };
 
-  let trades = getTrades();
-  trades.unshift(trade);
-  localStorage.setItem("trades", JSON.stringify(trades));
-
-  render();
-  resetForm();
+  if(file) reader.readAsDataURL(file);
+  else reader.onload();
 }
 
-function resetForm(){
-  document.querySelectorAll("input, textarea").forEach(i=>{ if(i.type!="checkbox") i.value=""; });
-  document.querySelectorAll(".chk").forEach(c=>c.checked=false);
-  document.getElementById("warn").innerText="";
-}
+function calcStats(trades){
+  let wins=trades.filter(t=>t.result==="Win");
+  let profit=0;
 
-function updateStats(trades){
-  let total = trades.length;
-  let wins = trades.filter(t=>t.result=="Win").length;
-  let losses = trades.filter(t=>t.result=="Loss").length;
-  let wr = total ? ((wins/total)*100).toFixed(1) : 0;
+  trades.forEach(t=>{
+    profit += t.result==="Win" ? t.rr : -1;
+  });
 
-  document.getElementById("total").innerText=total;
-  document.getElementById("wins").innerText=wins;
-  document.getElementById("losses").innerText=losses;
-  document.getElementById("wr").innerText=wr+"%";
+  let aplus=trades.filter(t=>t.aplus);
+  let aplusWR = aplus.length ? (aplus.filter(t=>t.result==="Win").length/aplus.length*100).toFixed(1) : 0;
+
+  total.innerText=trades.length;
+  wr.innerText= trades.length ? (wins.length/trades.length*100).toFixed(1)+"%" : "0%";
+  profit.innerText=profit;
+  document.getElementById("aplus").innerText=aplusWR+"%";
 }
 
 function render(){
-  let trades = getTrades();
-  let filter = document.getElementById("filter").value;
-
-  if(filter!="all"){
-    trades = trades.filter(t=>t.result==filter);
-  }
-
-  updateStats(getTrades());
+  let trades=getTrades();
+  calcStats(trades);
 
   let html="";
-  trades.forEach(t=>{
-    html += `<div style="border-bottom:1px solid #333;padding:10px">
-      ${t.type} | ${t.tf} | ${t.session} | RR:${t.rr} | ${t.result}<br>
-      ${t.date}<br>
-      <small>${t.note}</small>
+  trades.forEach((t,i)=>{
+    html+=`
+    <div class="card ${t.result==='Win'?'win':'loss'}">
+      ${t.type} | ${t.tf} | ${t.session} | RR:${t.rr} | ${t.result}
+      <br>${t.date}
+      <br>${t.aplus?"A+ Trade":""}
+      <br>${t.note}
+      ${t.img?`<img src="${t.img}">`:""}
+      <br>
+      <button onclick="del(${i})">Delete</button>
     </div>`;
   });
 
-  document.getElementById("list").innerHTML=html;
+  list.innerHTML=html;
+  updateCharts(trades);
+}
+
+function del(i){
+  let trades=getTrades();
+  trades.splice(i,1);
+  localStorage.setItem("trades",JSON.stringify(trades));
+  render();
+}
+
+function updateCharts(trades){
+  let equity=[];
+  let total=0;
+
+  trades.slice().reverse().forEach(t=>{
+    total += t.result==="Win"?t.rr:-1;
+    equity.push(total);
+  });
+
+  new Chart(document.getElementById("equity"),{
+    type:"line",
+    data:{labels:equity.map((_,i)=>i+1),datasets:[{data:equity}]}
+  });
+
+  let wins=trades.filter(t=>t.result==="Win").length;
+  let losses=trades.length-wins;
+
+  new Chart(document.getElementById("pie"),{
+    type:"pie",
+    data:{labels:["Win","Loss"],datasets:[{data:[wins,losses]}]}
+  });
 }
 
 render();
