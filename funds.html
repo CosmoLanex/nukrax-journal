@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NUKRAX CRYPTO GATEWAY</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:url('https://i.postimg.cc/wxt5X75s/Select-Your-favourite-Crypto-20260221-142709-0000.png') no-repeat center center fixed;
+  background-size: cover;
+  display:flex;
+  justify-content:center;
+  padding:25px 10px;
+}
+
+
+
+.header{
+  letter-spacing:6px;
+  font-weight:900;
+  margin-bottom:5px;
+}
+
+.handle{
+  text-align:right;
+  font-weight:900;
+  margin-bottom:20px;
+}
+
+.handle a,
+.footer a{
+  text-decoration:none;
+  color:inherit;
+}
+
+.username{
+  text-decoration:underline;
+}
+
+.section-title{
+  letter-spacing:4px;
+  margin-bottom:20px;
+  color:#555;
+}
+
+.crypto-btn{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  padding:16px;
+  margin-bottom:15px;
+  border-radius:14px;
+  border:none;
+  background: rgba(255,255,255,0.2);
+  cursor:pointer;
+  box-shadow:0 6px 15px rgba(0,0,0,0.25);
+  font-weight:600;
+  letter-spacing:3px;
+  transition:0.2s;
+}
+
+.crypto-btn:hover{
+  transform:scale(1.02);
+}
+
+.crypto-btn img{
+  position:absolute;
+  left:18px;
+  width:30px;
+  height:30px;
+  border-radius:5px;
+}
+
+.popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.65);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  padding:15px;
+}
+
+.popup-content{
+  background:#fff;
+  padding:28px;
+  border-radius:22px;
+  width:360px;
+  max-width:100%;
+  text-align:center;
+  animation:pop 0.25s ease;
+}
+
+@keyframes pop{
+  from{transform:scale(0.9); opacity:0;}
+  to{transform:scale(1); opacity:1;}
+}
+
+.crypto-top{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+}
+
+.crypto-top img{
+  width:32px;
+  height:32px;
+}
+
+.qr-wrapper{
+  margin-top:15px;
+}
+
+.qr-wrapper canvas{
+  width:260px;
+  height:260px;
+}
+
+.address{
+  margin:15px 0;
+  word-break:break-all;
+  font-size:14px;
+}
+
+.copy-btn{
+  background:#000;
+  color:#fff;
+  border:none;
+  padding:10px 20px;
+  border-radius:10px;
+  cursor:pointer;
+  margin-top:8px;
+  font-weight:600;
+}
+
+.notice{
+  margin-top:12px;
+  font-size:13px;
+  color:#d40000;
+}
+
+.footer{
+  margin-top:25px;
+  font-weight:900;
+}
+
+.top-logo img{
+  width:240px;
+  height:120px;
+  object-fit:cover;
+  margin-bottom:20px;
+  display:block;
+  margin-left:auto;
+  margin-right:auto;
+  border-radius:5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="top-logo">
+    <img src="https://i.postimg.cc/Lsjwc3nD/1000013393-Picsart-Ai-Image-Enhancer.png" alt="NUKRAX Logo">
+  </div>
+
+  <div class="header">NUKRAX CRYPTO GATEWAY</div>
+
+  <div class="handle">
+    <a href="https://linktr.ee/CosmoLanex" target="_blank">@<span class="username">cosmolanex</span></a>
+  </div>
+
+  <div class="section-title">SELECT YOUR FAVOURITE CRYPTO</div>
+
+  <button class="crypto-btn" onclick="openCrypto('USDT / TRC20','TR3VgpXVS2rDMNwwCeR4DPdre5URfC9cQo','https://i.postimg.cc/c4DMNwcm/1000013208-removebg-preview.png','TRC20','Please use TRC20 network')">
+    <img src="https://i.postimg.cc/c4DMNwcm/1000013208-removebg-preview.png">
+    USDT - TRC20
+  </button>
+
+  <button class="crypto-btn" onclick="openCrypto('BITCOIN','bc1qk2t0uvv4j7kfzpn8mvt8uxtt6cq0dnkp4dgeas','https://i.postimg.cc/nrfCpDbk/1000013214-removebg-preview.png')">
+    <img src="https://i.postimg.cc/nrfCpDbk/1000013214-removebg-preview.png">
+    BITCOIN
+  </button>
+
+  <button class="crypto-btn" onclick="openCrypto('ETHEREUM','0x0F50eeb9F646f1A67c68e571BDe22C4426edaeB6','https://i.postimg.cc/MHStvwcc/1000013215-removebg-preview.png')">
+    <img src="https://i.postimg.cc/MHStvwcc/1000013215-removebg-preview.png">
+    ETHEREUM
+  </button>
+
+  <button class="crypto-btn" onclick="openCrypto('SOLANA','Dp5YavkzJ5Chtq6rFKnim7WR3xXksJVKg5iTKZjZZH7W','https://i.postimg.cc/prc93YtP/1000013161-removebg-preview.png')">
+    <img src="https://i.postimg.cc/prc93YtP/1000013161-removebg-preview.png">
+    SOLANA
+  </button>
+
+  <button class="crypto-btn" onclick="openCrypto('XRP','rNxp4h8apvRis6mJf9Sh8C6iRxfrDWN7AV','https://i.postimg.cc/MpMR24T7/1000013210-removebg-preview.png','XRP','Use XRP tag/memo: 437079162','437079162')">
+    <img src="https://i.postimg.cc/MpMR24T7/1000013210-removebg-preview.png">
+    XRP
+  </button>
+
+  <button class="crypto-btn" onclick="openCrypto('TRON','TR3VgpXVS2rDMNwwCeR4DPdre5URfC9cQo','https://i.postimg.cc/qRkzRZJk/1000013211-removebg-preview.png')">
+    <img src="https://i.postimg.cc/qRkzRZJk/1000013211-removebg-preview.png">
+    TRON
+  </button>
+
+  <button class="crypto-btn" onclick="openCrypto('BNB','0x3391cc7250b2b035f38259cb2b49d2ad014d718b','https://i.postimg.cc/9QZMBjzc/1000013213-removebg-preview.png')">
+    <img src="https://i.postimg.cc/9QZMBjzc/1000013213-removebg-preview.png">
+    BINANCE
+  </button>
+
+  <div class="footer">
+    nukrax crypto gateway created by <a href="https://linktr.ee/CosmoLanex" target="_blank">@<span class="username">CosmoLanex</span></a>
+  </div>
+
+</div>
+
+<div class="popup" id="cryptoPopup">
+  <div class="popup-content">
+    <div class="crypto-top">
+      <img id="cryptoLogo" src="">
+      <div id="cryptoName"></div>
+    </div>
+    <div class="qr-wrapper">
+      <canvas id="cryptoQR"></canvas>
+    </div>
+    <div class="address" id="cryptoAddress"></div>
+    <button class="copy-btn" id="copyAddressBtn">COPY ADDRESS</button>
+    <button class="copy-btn" id="copyMemoBtn" style="display:none; margin-left:10px;">COPY MEMO</button>
+    <div class="notice" id="cryptoNotice"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
+<script>
+const popup = document.getElementById('cryptoPopup');
+const cryptoLogo = document.getElementById('cryptoLogo');
+const cryptoName = document.getElementById('cryptoName');
+const cryptoAddress = document.getElementById('cryptoAddress');
+const cryptoQR = document.getElementById('cryptoQR');
+const cryptoNotice = document.getElementById('cryptoNotice');
+const copyAddressBtn = document.getElementById('copyAddressBtn');
+const copyMemoBtn = document.getElementById('copyMemoBtn');
+let currentMemo = '';
+
+function openCrypto(name, address, logo, network='', notice='', memo=''){
+  cryptoName.textContent = name + (network ? ' (' + network + ')' : '');
+  cryptoLogo.src = logo;
+  cryptoAddress.textContent = address;
+  cryptoNotice.textContent = notice || '';
+  currentMemo = memo || '';
+  copyMemoBtn.style.display = currentMemo ? 'inline-block' : 'none';
+  if(notice) alert(notice);
+  new QRious({ element: cryptoQR, value: address, size: 260 });
+  popup.style.display = 'flex';
+}
+
+popup.addEventListener('click', e=>{
+  if(e.target === popup) popup.style.display='none';
+});
+
+copyAddressBtn.addEventListener('click', ()=>{
+  navigator.clipboard.writeText(cryptoAddress.textContent)
+    .then(()=>alert('Address copied to clipboard!'))
+    .catch(()=>alert('Failed to copy.'));
+});
+
+copyMemoBtn.addEventListener('click', ()=>{
+  if(currentMemo){
+    navigator.clipboard.writeText(currentMemo)
+      .then(()=>alert('Memo copied to clipboard!'))
+      .catch(()=>alert('Failed to copy memo.'));
+  }
+});
+</script>
+
+</body>
+</html>
