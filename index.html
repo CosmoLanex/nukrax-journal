@@ -45,6 +45,7 @@
       display:flex;
       gap:10px;
       flex-wrap:wrap;
+      align-items:center;
     }
 
     .stat {
@@ -53,6 +54,12 @@
       border-radius:10px;
       min-width:120px;
       text-align:center;
+    }
+
+    .funds-btn {
+      margin-left:auto;
+      background:#4d4d4d;
+      padding:10px 14px;
     }
 
     .win { border-left:5px solid #00ff88; }
@@ -76,6 +83,9 @@
   <div class="stat">Win Rate<br><b id="wr">0%</b></div>
   <div class="stat">Profit<br><b id="profit">0</b></div>
   <div class="stat">A+ WR<br><b id="aplus">0%</b></div>
+
+  <!-- SEPARATE BUTTON -->
+  <button class="funds-btn" onclick="goFunds()">Funds</button>
 </div>
 
 <!-- INPUT -->
@@ -149,11 +159,16 @@ function getTrades(){
 }
 
 function sessionWarn(){
-  if(session.value === "Asia"){
+  let sessionEl = document.getElementById("session");
+  if(sessionEl.value === "Asia"){
     warn.innerText = "⚠ Avoid Asia session (low probability)";
   } else {
     warn.innerText = "";
   }
+}
+
+function goFunds(){
+  window.location.href = "funds.html";
 }
 
 function saveTrade(){
@@ -172,7 +187,7 @@ function saveTrade(){
       type: type.value,
       tf: tf.value,
       session: session.value,
-      rr: parseFloat(rr.value || 1),
+      rr: isNaN(parseFloat(rr.value)) ? 1 : parseFloat(rr.value),
       result: result.value,
       note: note.value,
       aplus: aplusBox.checked,
@@ -245,6 +260,8 @@ function render(){
 }
 
 function deleteTrade(i){
+  if(!confirm("Delete this trade?")) return;
+
   let trades = getTrades();
   trades.splice(i,1);
   localStorage.setItem("trades", JSON.stringify(trades));
